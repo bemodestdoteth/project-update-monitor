@@ -1,0 +1,15 @@
+# Environment variable
+.env
+
+# Database file
+coins.db
+
+# Log file
+*.log
+
+withdraw_close_record
+user-agents.csv
+test.py
+status.json
+chromedriver
+__pycache__
