@@ -2,7 +2,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 from update import get_update, send_error_message
 from config import print_n_log
-from db import create_coins_db, create_xangle_rebrand_db, create_xangle_swap_db, create_coindar_db, create_noti_db, create_proxy_db
+from db import create_coins_db, create_xangle_rebrand_db, create_xangle_swap_db, create_coindar_db, create_proxy_db
 import os
 
 def main():

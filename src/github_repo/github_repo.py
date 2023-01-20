@@ -13,7 +13,7 @@ from db import get_coin, update_post
 from config import prior_setup_bs4, print_n_log
 
 @prior_setup_bs4
-def github_repo_scrape(coin, proxy):
+def github_repo_scrape(coin, proxy, user_agent):
     '''
     Scrapes the site change database accordingly
     
@@ -26,7 +26,7 @@ def github_repo_scrape(coin, proxy):
     # Make request to site
     s = requests.Session()
 
-    html = s.get(coin["link"], proxies={"http": proxy}, verify=False, timeout=50)
+    html = s.get(coin["link"], proxies={"http": proxy}, headers={"User-Agent": user_agent}, verify=False, timeout=50)
     soup = BeautifulSoup(html.text, 'html.parser')
 
     # Fetch every file from the directory

@@ -3,7 +3,6 @@ import requests
 
 # Import file from parent directory
 from pathlib import Path
-import json
 import os
 import sys
 os.chdir(str(Path(os.path.dirname(__file__)).parent.parent.absolute()))
@@ -31,7 +30,7 @@ def insert(coins):
     con.commit()
     con.close()
 @prior_setup_bs4
-def coindar_scrape(coin, proxy):
+def coindar_scrape(coin, proxy, user_agent):
     '''
     Scrapes the site change database accordingly
     
@@ -44,7 +43,7 @@ def coindar_scrape(coin, proxy):
     # Make request to site
     s = requests.Session()
 
-    html = s.get(coin["link"], proxies={"http": proxy}, verify=False, timeout=50)
+    html = s.get(coin["link"], proxies={"http": proxy}, headers={"User-Agent": user_agent}, verify=False, timeout=50)
     soup = BeautifulSoup(html.text, 'html.parser')
 
     # First time scraping
