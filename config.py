@@ -51,6 +51,13 @@ def parse_markdown_v2(msg):
     for reserved_word in reserved_words:
         msg = str(msg).replace(reserved_word, "\{}".format(reserved_word))
     return msg
+async def send_notification(msg):
+    # Telegram bot configuration
+    bot = telegram.Bot(token = os.environ['TELEGRAM_BOT_TOKEN'])
+    chat_id = os.environ['TELEGRAM_CHAT_ID']
+
+    msg = '__*🔔Message from {}🔔*__\n{}'.format("Project Update Monitor", parse_markdown_v2(msg))
+    await bot.sendMessage(chat_id=chat_id, text=msg, parse_mode='markdownv2')
 async def send_message(update_info):
     # Resolve reserved characters
     update_name = parse_markdown_v2(update_info['name'])
