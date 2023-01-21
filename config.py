@@ -27,9 +27,10 @@ def print_n_log(msg, is_error = False):
 def stopwatch(func):
     def inner(*args, **kwargs):
         start = time.time()
-        func(*args, **kwargs)
+        result = func(*args, **kwargs)
         end = time.time()
         print("Elapsed time: {}".format(end - start))
+        return result
     return inner
 def proxy_agent_rotation():
     # First time setting proxy
