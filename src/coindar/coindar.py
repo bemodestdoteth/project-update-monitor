@@ -89,7 +89,14 @@ def coindar_scrape(coin, proxy, user_agent):
         latest_post = soup.select_one('div.caption h3 a')
         post_name = soup.select_one('div.coin h2 span').text
         post_title = latest_post.text.replace("\n", "").strip()
-        post_date = datetime.strptime(soup.find('div', class_="day").text.replace("\n", ""), "%B %d, %Y").strftime("%Y.%m.%d")
+        date_raw = soup.find('div', class_="day").text.replace("\n", "")
+        try:
+            post_date = datetime.strptime(date_raw, "%B %d, %Y").strftime("%Y.%m.%d")
+        except:
+            # To get the last day of the month
+            temp_date = (datetime.strptime(date_raw, "%B %Y")).strftime("%Y/%m").split("/")
+            ranges = calendar.monthrange(int(temp_date[0]), int(temp_date[1]))
+            post_date = (datetime.strptime(date_raw, "%B %Y") + timedelta(days=ranges[1] - 1)).strftime("%Y.%m.%d")
         post_link = base_url + latest_post['href']
         
         s.close()
