@@ -1,4 +1,4 @@
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
 from update import get_update
 from config import print_n_log, send_notification, send_error_message
@@ -21,13 +21,9 @@ def main():
 
     # Reset previous proxy before moving on
     reset_proxy()
-    scheduler = BackgroundScheduler()
+    scheduler = BlockingScheduler()
     scheduler.add_job(get_update, "interval", minutes=30, next_run_time=datetime.now())
     scheduler.start()
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print_n_log(e)
-        asyncio.run(send_error_message("Project Update Monitor", e))
+    main()

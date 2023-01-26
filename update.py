@@ -39,45 +39,48 @@ def scrape_func_selector(coin):
     else:
         return "Pass"
 def get_update():
-    while True:
-        coins = get_all_coins()
-        for coin in coins:
-            result = scrape_func_selector(coin)
-            if result is None:
-                print_n_log("{} has no further updates".format(coin['name']))
-            elif result == "Pass":
-                print_n_log("Scraping {}: Not updated yet.".format(coin['name']))
-            elif result == "New":
-                print_n_log("A new data has been inserted into {}".format(coin['name']))                
-            else:
-                print_n_log("{} has some update. Sending via telegram message...".format(result['name']))
+    try:
+        while True:
+            coins = get_all_coins()
+            for coin in coins:
+                result = scrape_func_selector(coin)
+                if result is None:
+                    print_n_log("{} has no further updates".format(coin['name']))
+                elif result == "Pass":
+                    print_n_log("Scraping {}: Not updated yet.".format(coin['name']))
+                elif result == "New":
+                    print_n_log("A new data has been inserted into {}".format(coin['name']))                
+                else:
+                    print_n_log("{} has some update. Sending via telegram message...".format(result['name']))
+                    asyncio.run(send_message(result))
+
+            # Look for xangle updates after looking through each token
+            result = coindar_scrape({
+                "name": "COINDAR HARD FORK DISCLOSURE",
+                "link": "https://coindar.org/en/search?page=1&text=&start=2021-12-04&cats=10&im=&rs=0&fav=0&coins=&cap_from=0&cap_to=9999999999999&vol_from=0&vol_to=9999999999999&ex=1312&sort=1&order=1",
+                "selector": ".bc-insight-list-item-wrapper"})
+            if result is not None:
                 asyncio.run(send_message(result))
 
-        # Look for xangle updates after looking through each token
-        result = coindar_scrape({
-            "name": "COINDAR HARD FORK DISCLOSURE",
-            "link": "https://coindar.org/en/search?page=1&text=&start=2021-12-04&cats=10&im=&rs=0&fav=0&coins=&cap_from=0&cap_to=9999999999999&vol_from=0&vol_to=9999999999999&ex=1312&sort=1&order=1",
-            "selector": ".bc-insight-list-item-wrapper"})
-        if result is not None:
-            asyncio.run(send_message(result))
+            result = xangle_token_swap_scrape({
+                "name": "TOKEN SWAP DISCLOSURE",
+                "link": "https://xangle.io/insight/disclosure?category=token_swap",
+                "selector": ".bc-insight-list-item-wrapper"})
+            if result is not None:
+                asyncio.run(send_message(result))
 
-        result = xangle_token_swap_scrape({
-            "name": "TOKEN SWAP DISCLOSURE",
-            "link": "https://xangle.io/insight/disclosure?category=token_swap",
-            "selector": ".bc-insight-list-item-wrapper"})
-        if result is not None:
-            asyncio.run(send_message(result))
+            result = xangle_token_rebrand_scrape({
+                "name": "TOKEN REBRAND DISCLOSURE",
+                "link": "https://xangle.io/insight/disclosure?category=token_rebranding",
+                "selector": ".bc-insight-list-item-wrapper"})
+            if result is not None:
+                asyncio.run(send_message(result))
 
-        result = xangle_token_rebrand_scrape({
-            "name": "TOKEN REBRAND DISCLOSURE",
-            "link": "https://xangle.io/insight/disclosure?category=token_rebranding",
-            "selector": ".bc-insight-list-item-wrapper"})
-        if result is not None:
-            asyncio.run(send_message(result))
-
-        # 30 min cooldown after a successful scraping.
-        print_n_log("Website updating job finished. Next job is projected at {}".format(datetime.strftime(datetime.now() + timedelta(minutes=30), format="%Y/%m/%d %H:%M:%S")))
-        #time.sleep(1800)
+            # 30 min cooldown after a successful scraping.
+            print_n_log("Website updating job finished. Next job is projected at {}".format(datetime.strftime(datetime.now() + timedelta(minutes=30), format="%Y/%m/%d %H:%M:%S")))
+            #time.sleep(1800)
+    except Exception as e:
+        asyncio.run(send_error_message(coin["name"], e))
 
 if __name__ == "__main__":
     get_update()
