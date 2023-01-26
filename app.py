@@ -1,7 +1,7 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 from update import get_update
-from config import print_n_log, send_notification
+from config import print_n_log, send_notification, send_error_message
 from db import create_coins_db, create_xangle_rebrand_db, create_xangle_swap_db, create_coindar_db, create_proxy_db
 import asyncio
 import os
@@ -24,4 +24,8 @@ def main():
     scheduler.start()
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print_n_log(e)
+        asyncio.run(send_error_message(coin["name"], e))
