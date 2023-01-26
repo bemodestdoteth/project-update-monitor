@@ -85,6 +85,10 @@ def prior_setup_bs4(func):
         print("-----------------------------------------")
 
         (proxl, user_agent) = proxy_agent_rotation()
+
+        if get_working_proxy() is None:
+            write_proxy(proxl)
+
         return func(coin, proxl, user_agent)
     return inner
 def prior_setup_selenium(func):
@@ -110,7 +114,7 @@ def prior_setup_selenium(func):
                 if driver != "":
                     driver.quit()
                 error_cnt = error_cnt + 1
-                if error_cnt >= 3:
+                if error_cnt >= 2:
                     print_n_log("Changing proxy and user_agents due to concurrent errors...")
                     delete_proxy(proxl)
                     (proxl, user_agent) = proxy_agent_rotation()
@@ -121,7 +125,7 @@ def prior_setup_selenium(func):
                 if driver != "":
                     driver.quit()
                 error_cnt = error_cnt + 1
-                if error_cnt >= 3:
+                if error_cnt >= 2:
                     print_n_log("Changing proxy and user_agents due to concurrent errors...")
                     delete_proxy(proxl)
                     (proxl, user_agent) = proxy_agent_rotation()

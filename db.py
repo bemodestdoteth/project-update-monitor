@@ -129,6 +129,12 @@ def delete_proxy(proxy):
     cur.execute(query, (proxy, ))
     con.commit()
     con.close()
+def reset_proxy():
+    con = sqlite3.connect(os.path.abspath('coins.db'))
+    cur = con.cursor()
+    cur.execute("DELETE FROM working_proxy")
+    con.commit()
+    con.close()
 def update_post(post, coin):
     con = sqlite3.connect('coins.db')
     cur = con.cursor()
