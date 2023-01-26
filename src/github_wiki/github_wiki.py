@@ -29,12 +29,11 @@ def github_wiki_scrape(coin, proxy, user_agent):
     html = s.get(coin["link"], proxies={"http": proxy}, headers={"User-Agent": user_agent}, verify=False, timeout=50)
     soup = BeautifulSoup(html.text, 'html.parser')
 
-    file = soup.select('a.flex-1.py-1.text-bold')[-1]
+    file = soup.select('a.Truncate-text')[-1]
     latest_files = {
         'title' : file.text,
         'link': base_url + file['href']
     }
-
     s.close()
 
     # First time scraping
@@ -50,4 +49,5 @@ def github_wiki_scrape(coin, proxy, user_agent):
         return latest_files
 
 # Test Code
-#github_wiki_scrape(get_coin("CSPR"))
+if __name__ == "__main__":
+    github_wiki_scrape(get_coin("CSPR"))
