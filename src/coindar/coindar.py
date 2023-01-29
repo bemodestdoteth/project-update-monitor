@@ -118,7 +118,7 @@ if __name__ == "__main__":
     
     result = coindar_scrape({
         "name": "COINDAR HARD FORK DISCLOSURE",
-        "link": "https://coindar.org/en/search?page=1&text=&start=2021-12-04&cats=10&im=&rs=0&fav=0&coins=&cap_from=0&cap_to=9999999999999&vol_from=0&vol_to=9999999999999&ex=1312&sort=1&order=1",
-        "selector": ".bc-insight-list-item-wrapper"})
+        "link": "https://coindar.org/en/search?page=1&text=&start=2021-12-04&cats=10&im=&rs=0&fav=0&coins=&cap_from=0&cap_to=9999999999999&vol_from=0&vol_to=9999999999999&ex=1312&sort=1&order=1"
+        })
     if result is not None:
         asyncio.run(send_message(result))
