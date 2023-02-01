@@ -21,9 +21,12 @@ def main():
 
     # Reset previous proxy before moving on
     reset_proxy()
+    get_update()
+    '''
     scheduler = BlockingScheduler()
     scheduler.add_job(get_update, "interval", minutes=30, next_run_time=datetime.now())
-    scheduler.start()
+    scheduler.start()    
+    '''
 
 if __name__ == "__main__":
     main()
