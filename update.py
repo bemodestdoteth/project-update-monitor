@@ -21,27 +21,20 @@ load_dotenv()
 
 def scrape_func_selector(coin):
     if coin['source'] == "github-release":
-        return
         return github_scrape(coin)
     elif coin['source'] == "github-repo":
-        return
         return github_repo_scrape(coin)
     elif coin['source'] == "icx-forum":
-        return
         return icx_forum_scrape(coin)
     elif coin['source'] == "github-wiki":
-        return
         return github_wiki_scrape(coin)
     elif coin['source'] == "mintscan":
-        return
         return mintscan_scrape(coin)
     elif coin['source'] == "snx-blog":
-        return
         return snx_blog_scrape(coin)
     elif coin['source'] == "xangle":
         return xangle_scrape(coin)
     elif coin['source'] == "xtz-agora":
-        return
         return xtz_agora_scrape(coin)
     else:
         return "Pass"
