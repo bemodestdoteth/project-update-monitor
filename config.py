@@ -1,13 +1,3 @@
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import WebDriverException, TimeoutException
-
-# FreeProxy for preventing IP ban
-from fp.fp import FreeProxy
-
-from db import get_working_proxy, write_proxy, delete_proxy
-from selenium import webdriver
 from datetime import datetime
 import logging
 import os
