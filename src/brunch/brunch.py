@@ -11,30 +11,27 @@ from db import get_coin, update_post
 from config import prior_setup_playwright
 import json
 
-class xtz_agora:
+class brunch:
     def __init__(self) -> None:
         pass
 
     @prior_setup_playwright
     def scrape(coin, user_agent):
         # Storing post
-        base_url = "https://www.tezosagora.org"
+        base_url = "https://brunch.co.kr"
 
         with sync_playwright() as p:
             browser = p.chromium.launch()
             page = browser.new_page(user_agent=user_agent)
             page.goto(coin['link'])
-            page.wait_for_selector('div._agoraSelect_95594')
+            page.wait_for_selector('span.txt_subject')
 
-            # Open proposal combobox
-            page.locator('div._agoraSelect_95594').click()
-            page.wait_for_selector('div._agoraSelect__menu__item_95594')
-
-            current_proposal = page.query_selector('div._agoraSelect__menu__item_95594').inner_text()
+            # Topmost Proposal
             latest_proposal = {
-                'title' : current_proposal,
-                'link': "{}/period/{}".format(base_url, current_proposal[:2])
+                'title' : page.query_selector('span.txt_subject').inner_text(),
+                'link': base_url + page.query_selector('a.link_magazine').get_attribute('href')
             }
+            print(latest_proposal)
 
         # First time scraping
         if coin["post"] == "":
@@ -44,10 +41,11 @@ class xtz_agora:
             return None
         else:
             update_post(latest_proposal, coin['name'])
+
             # Return post to send telegram message
             latest_proposal['name'] = coin['name']
             return latest_proposal
 
 # Testing code
 if __name__ == "__main__":
-    xtz_agora.scrape(get_coin("XTZ"))
+    icx_forum.scrape(get_coin("META"))

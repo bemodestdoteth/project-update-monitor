@@ -1,4 +1,4 @@
-from selenium.webdriver.common.by import By
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 # Import file from parent directory
 from pathlib import Path
@@ -8,31 +8,44 @@ os.chdir(str(Path(os.path.dirname(__file__)).parent.parent.absolute()))
 sys.path.append(str(Path(os.path.dirname(__file__)).parent.parent.absolute()))
 
 from db import get_coin, update_post
-from config import prior_setup_selenium
+from config import prior_setup_playwright
 import json
 
-@prior_setup_selenium
-def icx_forum_scrape(coin, driver, delay):
-    # Topmost Proposal
-    latest_proposal = {
-        'title' : driver.find_element(by=By.CSS_SELECTOR, value='span.topic-title').text,
-        'link': driver.find_element(by=By.CSS_SELECTOR, value='a.search-link').get_attribute('href')
-    }
+class icx_forum:
+    def __init__(self) -> None:
+        pass
 
-    driver.quit()
+    @prior_setup_playwright
+    def scrape(coin, user_agent):
+        # Storing post
+        base_url = "https://mintscan.io"
 
-    # First time scraping
-    if coin["post"] == "":
-        update_post(latest_proposal, coin['name'])
-        return "New"
-    elif json.loads(coin["post"]) == latest_proposal:
-        return None
-    else:
-        update_post(latest_proposal, coin['name'])
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page(user_agent=user_agent)
+            page.goto(coin['link'])
+            page.wait_for_selector('span.topic-title')
 
-        # Return post to send telegram message
-        latest_proposal['name'] = coin['name']
-        return latest_proposal
-    
+            # Topmost Proposal
+            latest_proposal = {
+                'title' : page.query_selector('span.topic-title').inner_text(),
+                'link': base_url + page.query_selector('a.search-link').get_attribute('href')
+            }
+            print(latest_proposal)
+
+        # First time scraping
+        if coin["post"] == "":
+            update_post(latest_proposal, coin['name'])
+            return "New"
+        elif json.loads(coin["post"]) == latest_proposal:
+            return None
+        else:
+            update_post(latest_proposal, coin['name'])
+
+            # Return post to send telegram message
+            latest_proposal['name'] = coin['name']
+            return latest_proposal
+
 # Testing code
-#icx_forum_scrape(get_coin("ICX"))
+if __name__ == "__main__":
+    icx_forum.scrape(get_coin("ICX"))

@@ -1,4 +1,4 @@
-from selenium.webdriver.common.by import By
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 # Import file from parent directory
 from pathlib import Path
@@ -8,31 +8,43 @@ os.chdir(str(Path(os.path.dirname(__file__)).parent.parent.absolute()))
 sys.path.append(str(Path(os.path.dirname(__file__)).parent.parent.absolute()))
 
 from db import get_coin, update_post
-from config import prior_setup_selenium
+from config import prior_setup_playwright
 import json
 
-@prior_setup_selenium
-def snx_blog_scrape(coin, driver, delay):
-    # Topmost Proposal
-    latest_proposal = {
-        'title' : driver.find_element(by=By.CSS_SELECTOR, value='div ~ h2.post-card-title').text,
-        'link': driver.find_element(by=By.CSS_SELECTOR, value='a.post-card-content-link').get_attribute('href')
-    }
+class snx_blog:
+    def __init__(self) -> None:
+        pass
 
-    driver.quit()
-    
-    # First time scraping
-    if coin["post"] == "":
-        update_post(latest_proposal, coin['name'])
-        return "New"
-    elif json.loads(coin["post"]) == latest_proposal or "release" not in latest_proposal['title'].lower():
-        return None
-    else:
-        update_post(latest_proposal, coin['name'])
+    @prior_setup_playwright
+    def scrape(coin, user_agent):
+        # Storing post
+        base_url = "https://blog.synthetix.io"
 
-        # Return post to send telegram message
-        latest_proposal['name'] = coin['name']
-        return latest_proposal
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page(user_agent=user_agent)
+            page.goto(coin['link'])
+            page.wait_for_selector('article div a.post-card-content-link')
+
+            # Topmost Proposal
+            latest_proposal = {
+                'title' : page.query_selector('a header h2.post-card-title').inner_text(),
+                'link': base_url + page.query_selector('article div a.post-card-content-link').get_attribute('href')
+            }
+
+        # First time scraping
+        if coin["post"] == "":
+            update_post(latest_proposal, coin['name'])
+            return "New"
+        elif json.loads(coin["post"]) == latest_proposal or "release" not in latest_proposal['title'].lower():
+            return None
+        else:
+            update_post(latest_proposal, coin['name'])
+
+            # Return post to send telegram message
+            latest_proposal['name'] = coin['name']
+            return latest_proposal
 
 # Testing code
-#snx_blog_scrape(get_coin("SNX"))
+if __name__ == "__main__":
+    snx_blog.scrape(get_coin("SNX"))

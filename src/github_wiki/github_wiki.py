@@ -12,42 +12,46 @@ sys.path.append(str(Path(os.path.dirname(__file__)).parent.parent.absolute()))
 from db import get_coin, update_post
 from config import prior_setup_bs4
 
-@prior_setup_bs4
-def github_wiki_scrape(coin, proxy, user_agent):
-    '''
-    Scrapes the site change database accordingly
-    
-    Parameters:
-        coin (str) -- Name of the coin
-    '''
-    # Storing post
-    base_url = 'https://github.com'
+class github_wiki:
+    def __init__(self) -> None:
+        pass
 
-    # Make request to site
-    s = requests.Session()
+    @prior_setup_bs4
+    def scrape(coin, user_agent):
+        '''
+        Scrapes the site change database accordingly
+        
+        Parameters:
+            coin (str) -- Name of the coin
+        '''
+        # Storing post
+        base_url = 'https://github.com'
 
-    html = s.get(coin["link"], proxies={"http": proxy}, headers={"User-Agent": user_agent}, verify=False, timeout=50)
-    soup = BeautifulSoup(html.text, 'html.parser')
+        # Make request to site
+        s = requests.Session()
 
-    file = soup.select('a.Truncate-text')[-1]
-    latest_files = {
-        'title' : file.text,
-        'link': base_url + file['href']
-    }
-    s.close()
+        html = s.get(coin["link"], headers={"User-Agent": user_agent}, verify=False, timeout=50)
+        soup = BeautifulSoup(html.text, 'html.parser')
 
-    # First time scraping
-    if coin["post"] == "":
-        update_post(latest_files, coin['name'])
-        return "New"
-    elif json.loads(coin["post"]) == latest_files:
-        return None
-    else:
-        update_post(latest_files, coin['name'])
-        # Return post to send telegram message
-        latest_files['name'] = coin['name']
-        return latest_files
+        file = soup.select('a.Truncate-text')[-1]
+        latest_files = {
+            'title' : file.text,
+            'link': base_url + file['href']
+        }
+        s.close()
+
+        # First time scraping
+        if coin["post"] == "":
+            update_post(latest_files, coin['name'])
+            return "New"
+        elif json.loads(coin["post"]) == latest_files:
+            return None
+        else:
+            update_post(latest_files, coin['name'])
+            # Return post to send telegram message
+            latest_files['name'] = coin['name']
+            return latest_files
 
 # Test Code
 if __name__ == "__main__":
-    github_wiki_scrape(get_coin("CSPR"))
+    github_wiki.scrape(get_coin("CSPR"))

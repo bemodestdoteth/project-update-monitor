@@ -9,64 +9,21 @@ def create_coins_db():
     cur = con.cursor()
 
     # Create table
-    cur.execute("CREATE TABLE coins (name PRIMARY KEY, source NOT NULL, link NOT NULL, selector, post, groups)")
+    cur.execute("CREATE TABLE coins (name PRIMARY KEY, source NOT NULL, post, link NOT NULL)")
     con.commit()
 
     # insert first values
-    query = "INSERT INTO coins VALUES (?, ?, ?, ?, ?, ?)"
+    query = "INSERT INTO coins VALUES (?, ?, ?, ?)"
     for coin in coins.items():
-        params = list((coin[0], coin[1]["source"], coin[1]["link"], coin[1]["selector"], coin[1]["post"], coin[1]["groups"]))
+        params = (coin[0], coin[1]["source"], coin[1]["post"], coin[1]["link"])
         cur.execute(query, params)
     con.commit()
     con.close()
-def create_xangle_swap_db():
-    # Should only operate if coin db is created
-    if os.path.isfile('coins.db'):
-        con = sqlite3.connect('coins.db')
-        cur = con.cursor()
-
-        # Create table
-        cur.execute("CREATE TABLE xangle_token_swap (id PRIMARY KEY, name NOT NULL, post NOT NULL, date NOT NULL, link NOT NULL)")
-        con.commit()
-        con.close()
-def create_xangle_rebrand_db():
-    # Should only operate if coin db is created
-    if os.path.isfile('coins.db'):
-        con = sqlite3.connect('coins.db')
-        cur = con.cursor()
-
-        # Create table
-        cur.execute("CREATE TABLE xangle_token_rebrand (id PRIMARY KEY, name NOT NULL, post NOT NULL, date NOT NULL, link NOT NULL)")
-        con.commit()
-        con.close()
-def create_coindar_db():
-    # Should only operate if coin db is created
-    if os.path.isfile('coins.db'):
-        con = sqlite3.connect('coins.db')
-        cur = con.cursor()
-
-        # Create tableh
-        cur.execute("CREATE TABLE coindar (id PRIMARY KEY, name NOT NULL, post NOT NULL, date NOT NULL, link NOT NULL)")
-        con.commit()
-        con.close()
-def create_proxy_db():
-    # Should only operate if coin db is created
-    if os.path.isfile('coins.db'):
-        con = sqlite3.connect('coins.db')
-        cur = con.cursor()
-
-        # Create table
-        cur.execute("CREATE TABLE working_proxy (proxy)")
-        con.commit()    
-        con.close()
-def insert_coin(coins):
+def update_post(post, coin):
     con = sqlite3.connect('coins.db')
     cur = con.cursor()
-    query = "INSERT INTO coins VALUES (?, ?, ?, ?, ?, ?)"
-
-    for coin in coins.items():
-        params = list((coin[0], coin[1]["source"], coin[1]["link"], coin[1]["selector"], coin[1]["post"], coin[1]["groups"]))
-        cur.execute(query, params)
+    query = "UPDATE coins SET post = ? WHERE name = ?"
+    cur.execute(query, (json.dumps(post, ensure_ascii = False), coin))
     con.commit()
     con.close()
 def get_coin(coin):
@@ -77,12 +34,11 @@ def get_coin(coin):
     item = cur.execute(query, (coin,)).fetchone()
     con.close()
     return {
-        "name": item[0],
-        "source": item[1],
-        "link": item[2],
-        "selector": item[3],
-        "post": item[4],
-        "groups": item[5]}
+            "name": item[0],
+            "source": item[1],
+            "post": item[2],
+            "link": item[3]
+        }
 def get_all_coins():
     con = sqlite3.connect('coins.db')
     cur = con.cursor()
@@ -94,13 +50,24 @@ def get_all_coins():
             res.append({
             "name": i[0],
             "source": i[1],
-            "link": i[2],
-            "selector": i[3],
-            "post": i[4],
-            "groups": i[5]})
+            "post": i[2],
+            "link": i[3]
+            })
         return res
     except:
         return None
+
+# Deprecated
+def insert_coin(coins):
+    con = sqlite3.connect('coins.db')
+    cur = con.cursor()
+    query = "INSERT INTO coins VALUES (?, ?, ?, ?, ?, ?)"
+
+    for coin in coins.items():
+        params = list((coin[0], coin[1]["source"], coin[1]["link"], coin[1]["selector"], coin[1]["post"], coin[1]["groups"]))
+        cur.execute(query, params)
+    con.commit()
+    con.close()
 def get_ticker():
     tickers = {}
     tickers["KRW"] = Bithumb.get_tickers('KRW')
@@ -135,13 +102,6 @@ def reset_proxy():
     cur.execute("DELETE FROM working_proxy")
     con.commit()
     con.close()
-def update_post(post, coin):
-    con = sqlite3.connect('coins.db')
-    cur = con.cursor()
-    query = "UPDATE coins SET post = ? WHERE name = ?"
-    cur.execute(query, (json.dumps(post), coin))
-    con.commit()
-    con.close()
 def overhaul_post(coin, name):
     con = sqlite3.connect('coins.db')
     cur = con.cursor()
@@ -154,233 +114,165 @@ coins = {
     "META": {
     "source": "brunch",
     "link": "https://brunch.co.kr/magazine/metadium-info",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },
     "EGLD": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/ElrondNetwork/elrond-go/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },
     "THETA": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/thetatoken/theta-protocol-ledger/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },
     "TFUEL": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/thetatoken/theta-protocol-ledger/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },
     "TDROP": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/thetatoken/theta-protocol-ledger/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },
     "CTXC": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/CortexFoundation/CortexTheseus/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },
     "MEDI": {
-    "source": "github-repo",
+    "source": "github_repo",
     "link": "https://github.com/medibloc/panacea-governance/tree/main/proposals",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },
     "XYM": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/symbol/symbol/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },
     "ATOLO": {
     "source": "mintscan",
     "link": "https://www.mintscan.io/rizon/proposals",
-    "selector":"div.FeaturedProposals_featuredProposalGrid__3pQ0-",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"HIVE": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/openhive-network/hive/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"QKC": {
-    "source": "github-repo",
+    "source": "github_repo",
     "link": "https://github.com/QuarkChain/QCEPs/tree/master/QCEP",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"ZIL": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/Zilliqa/Zilliqa/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"XTZ": {
-    "source": "xtz-agora",
+    "source": "xtz_agora",
     "link": "https://www.tezosagora.org/period/",
-    "selector":"div._agoraSelect_95594",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"ICX": {
-    "source": "icx-forum",
+    "source": "icx_forum",
     "link": "https://forum.icon.community/search?expanded=true&q=hard%20fork",
-    "selector":"span.topic-title",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"VET": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/vechain/thor/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"XEC": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/Bitcoin-ABC/bitcoin-abc/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"SNX": {
-    "source": "snx-blog",
+    "source": "snx_blog",
     "link": "https://blog.synthetix.io/author/synthetix/",
-    "selector":"div ~ h2.post-card-title",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"ALGO": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/algorand/go-algorand/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"ONT": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/ontio/ontology/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"ONG": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/ontio/ontology/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"BNB": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/bnb-chain/node/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"IOST": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/iost-official/go-iost/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"QTUM": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/qtumproject/qtum/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"CTK": {
-    "source": "github-repo",
+    "source": "github_repo",
     "link": "https://github.com/ShentuChain/mainnet",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"VELO": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/stellar/stellar-core/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"CENNZ": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/cennznet/cennznet/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"ETC": {
     "source": "xangle",
     "link": "https://xangle.io/insight/disclosure?search=etc&category=network_fork",
-    "selector":".bc-insight-list-item-wrapper",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"CSPR": {
-    "source": "github-wiki",
+    "source": "github_wiki",
     "link": "https://github.com/casper-network/casper-node/wiki",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"REI": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/REI-Network/rei/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"CKB": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/nervosnetwork/ckb/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"ELF": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/AElfProject/AElf/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": ""
+    "post": ""
     },"KCT-7": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/klaytn/klaytn/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": "HIPS, SSX, TEMCO, WIKEN, OBSR, BORA, NPT, SIX, MBX"
+    "post": ""
     },"TRC-20": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/tronprotocol/java-tron/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": "BTT, JST, SUN"
+    "post": ""
     },"BEP-20": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/bnb-chain/bsc/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": "CAKE, XVS, ALT, GMT, C98, SPRT"
+    "post": ""
     },"ERC-20": {
-    "source": "github-release",
+    "source": "github",
     "link": "https://github.com/ethereum/go-ethereum/releases/latest",
-    "selector":"",
-    "post": "",
-    "groups": "OGN, GLM, WOZX, TRV, OCEAN, BOBA"
-    }}
+    "post": ""
+    },"COINDAR HARD FORK DISCLOSURE": {
+    "source": "coindar",
+    "link": "https://coindar.org/en/search?page=1&text=&start=2021-12-04&cats=10&im=&rs=0&fav=0&coins=&cap_from=0&cap_to=9999999999999&vol_from=0&vol_to=9999999999999&ex=1249,1308,1312&sort=1&order=1",
+    "post": ""
+    }, "XANGLE TOKEN SWAP DISCLOSURE": {
+    "source": "xangle_swap",
+    "link": "https://xangle.io/insight/disclosure?category=token_swap",
+    "post": ""
+    }, "XANGLE TOKEN REBRAND DISCLOSURE": {
+    "source": "xangle_rebrand",
+    "link": "https://xangle.io/insight/disclosure?category=token_rebranding",
+    "post": ""
+    }
+}
+
 if __name__ == "__main__":
-    con = sqlite3.connect('coins.db')
-    cur = con.cursor()
-    # Create table
-    cur.execute("DROP TABLE xangle_token_swap")
-    cur.execute("DROP TABLE xangle_token_rebrand")
-    cur.execute("DROP TABLE coindar")
-    con.commit()
-    con.close()
     create_coins_db()
-    create_xangle_swap_db()
-    create_xangle_rebrand_db()
-    create_coindar_db()
-    #create_proxy_db()
