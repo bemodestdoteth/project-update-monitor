@@ -48,4 +48,4 @@ class icx_forum:
 
 # Testing code
 if __name__ == "__main__":
-    icx_forum.scrape(get_coin("ICX"))
+    icx_forum.scrape(icx_forum, get_coin("ICX"))

@@ -23,13 +23,15 @@ class mintscan:
         with sync_playwright() as p:
             browser = p.chromium.launch()
             page = browser.new_page(user_agent=user_agent)
+
+            page.set_viewport_size({"width": 750, "height": 1334})
             page.goto(coin['link'])
-            page.wait_for_selector('div h2')
+            page.wait_for_selector('a.ProposalCard_link__1SVm3')
 
             # Topmost Proposal
             latest_proposal = {
-                'title' : page.query_selector('div h2').inner_text(),
-                'link': base_url + page.query_selector('div.ProposalCard_rightArrowWrapper__3lX_p a.ProposalCard_link__38deC').get_attribute('href')
+                'title' : page.query_selector('a.ProposalCard_link__1SVm3').inner_text(),
+                'link': base_url + page.query_selector('a.ProposalCard_link__1SVm3').get_attribute('href')
             }
         
         # First time scraping
@@ -47,4 +49,4 @@ class mintscan:
 
 # Testing code
 if __name__ == "__main__":
-    mintscan.scrape(get_coin("ATOLO"))
+    mintscan.scrape(mintscan, get_coin("ATOLO"))
