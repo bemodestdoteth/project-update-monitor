@@ -23,6 +23,8 @@ class snx_blog:
         with sync_playwright() as p:
             browser = p.chromium.launch()
             page = browser.new_page(user_agent=user_agent)
+            page.set_viewport_size({"width": 750, "height": 1334})
+
             page.goto(coin['link'])
             page.wait_for_selector('article div a.post-card-content-link')
 
